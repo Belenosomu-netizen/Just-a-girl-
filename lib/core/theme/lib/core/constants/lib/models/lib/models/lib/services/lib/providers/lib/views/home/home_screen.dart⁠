@@ -1,0 +1,141 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../core/theme/app_theme.dart';
+import '../../providers/finance_provider.dart';
+import '../../services/ai_service.dart';
+import '../../core/constants/app_categories.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final TextEditingController _aiSearchController = TextEditingController();
+
+  void _handleAISubmit(String input) {
+    if (input.isEmpty) return;
+    final provider = Provider.of<FinanceProvider>(context, listen: false);
+    final parsedTransaction = AIService.parseNaturalLanguageInput(input);
+
+    if (parsedTransaction != null) {
+      provider.addTransaction(parsedTransaction);
+      _aiSearchController.clear();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('¡Añadido: ${parsedTransaction.title} por ${parsedTransaction.amount.toStringAsFixed(2)} €!'),
+          backgroundColor: AppColors.primaryPink,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = Provider.of<FinanceProvider>(context);
+
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Buenos días, ${provider.userName} 👋',
+                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text('Hoy', style: TextStyle(color: AppColors.textMuted, fontSize: 14)),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryPinkSoft,
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('SALDO DISPONIBLE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textMuted)),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${provider.availableBalance.toStringAsFixed(2).replaceAll('.', ',')} €',
+                      style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: AppColors.textDark),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      AIService.getSarcasticQuote(provider.availableBalance, provider.personalityTone),
+                      style: const TextStyle(fontStyle: FontStyle.italic, color: AppColors.textMuted, fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: const [AppColors.softShadow]),
+                child: TextField(
+                  controller: _aiSearchController,
+                  onSubmitted: _handleAISubmit,
+                  decoration: InputDecoration(
+                    hintText: "✨ Dime el daño: 'zara 49,99' 💀",
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.arrow_upward_rounded, color: AppColors.primaryPink),
+                      onPressed: () => _handleAISubmit(_aiSearchController.text),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text('Movimientos', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              provider.transactions.isEmpty
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40),
+                        child: Text('🐶\n¿Ese café de esta mañana? Apúntalo, que yo lo vea 💀', textAlign: TextAlign.center, style: TextStyle(color: AppColors.primaryPink, fontWeight: FontWeight.w600)),
+                      ),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: provider.transactions.length,
+                      itemBuilder: (context, index) {
+                        final item = provider.transactions[index];
+                        final category = AppCategories.findById(item.categoryId);
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          child: ListTile(
+                            leading: CircleAvatar(backgroundColor: category.color, child: Text(category.emoji)),
+                            title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            subtitle: Text(category.name),
+                            trailing: Text(
+                              '-${item.amount.toStringAsFixed(2)} €',
+                              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.statusRed),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
