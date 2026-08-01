@@ -1,0 +1,50 @@
+import 'package:flutter/material.dart';
+
+class AppColors {
+  static const Color backgroundLight = Color(0xFFFFF5F7);
+  static const Color cardLight = Color(0xFFFFFFFF);
+  static const Color primaryPink = Color(0xFFFF8DA1);
+  static const Color primaryPinkSoft = Color(0xFFFFEBF0);
+  static const Color accentLila = Color(0xFFE6E6FA);
+  static const Color textDark = Color(0xFF2E232B);
+  static const Color textMuted = Color(0xFF8A7A85);
+  static const Color statusGreen = Color(0xFF4EBA8E);
+  static const Color statusRed = Color(0xFFFF6B6B);
+
+  static const BoxShadow softShadow = BoxShadow(
+    color: Color(0x0C000000),
+    blurRadius: 16,
+    offset: Offset(0, 6),
+  );
+}
+
+class AppTheme {
+  static ThemeData get lightTheme {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: AppColors.backgroundLight,
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.primaryPink,
+        secondary: AppColors.accentLila,
+        surface: AppColors.cardLight,
+        onSurface: AppColors.textDark,
+      ),
+      cardTheme: CardTheme(
+        color: AppColors.cardLight,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: TextStyle(
+          color: AppColors.textDark,
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
