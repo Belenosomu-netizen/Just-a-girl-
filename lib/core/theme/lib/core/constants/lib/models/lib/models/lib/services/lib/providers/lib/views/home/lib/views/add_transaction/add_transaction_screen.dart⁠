@@ -1,0 +1,66 @@
+import 'package0/flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/constants/app_categories.dart';
+import '../../models/transaction_model.dart';
+import '../../providers/finance_provider.dart';
+
+class AddTransactionScreen extends StatefulWidget {
+  const AddTransactionScreen({super.key});
+
+  @override
+  State<AddTransactionScreen> createState() => _AddTransactionScreenState();
+}
+
+class _AddTransactionScreenState extends State<AddTransactionScreen> {
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  String _selectedCategoryId = 'ropa';
+
+  void _saveTransaction() {
+    final amount = double.tryParse(_amountController.text.replaceAll(',', '.')) ?? 0.0;
+    if (amount <= 0) return;
+
+    final newTransaction = TransactionModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      amount: amount,
+      type: TransactionType.expense,
+      categoryId: _selectedCategoryId,
+      title: _nameController.text.isEmpty ? AppCategories.findById(_selectedCategoryId).name : _nameController.text,
+      date: DateTime.now(),
+    );
+
+    Provider.of<FinanceProvider>(context, listen: false).addTransaction(newTransaction);
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Añadir movimiento')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            TextField(
+              controller: _amountController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(labelText: 'Cantidad (€)'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(labelText: 'Concepto (ej. Zara)'),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _saveTransaction,
+              child: const Text('Guardar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
