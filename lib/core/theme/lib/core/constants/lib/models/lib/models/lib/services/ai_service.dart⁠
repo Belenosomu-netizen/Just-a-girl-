@@ -1,0 +1,53 @@
+import '../models/transaction_model.dart';
+
+class AIService {
+  static TransactionModel? parseNaturalLanguageInput(String input) {
+    if (input.trim().isEmpty) return null;
+
+    final RegExp regex = RegExp(r'([a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+)\s+(\d+([.,]\d{1,2})?)');
+    final match = regex.firstMatch(input.trim());
+
+    if (match != null) {
+      final name = match.group(1)?.trim() ?? 'Gasto Generado';
+      final rawAmount = match.group(2)?.replaceAll(',', '.') ?? '0.0';
+      final amount = double.tryParse(rawAmount) ?? 0.0;
+
+      String guessedCategoryId = 'otros';
+      final lowerName = name.toLowerCase();
+
+      if (lowerName.contains('zara') || lowerName.contains('ropa')) {
+        guessedCategoryId = 'ropa';
+      } else if (lowerName.contains('mercadona') || lowerName.contains('super')) {
+        guessedCategoryId = 'supermercado';
+      } else if (lowerName.contains('café') || lowerName.contains('starbucks')) {
+        guessedCategoryId = 'cafe';
+      } else if (lowerName.contains('netflix') || lowerName.contains('spotify')) {
+        guessedCategoryId = 'suscripciones';
+      }
+
+      return TransactionModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        amount: amount,
+        type: TransactionType.expense,
+        categoryId: guessedCategoryId,
+        title: name,
+        date: DateTime.now(),
+      );
+    }
+    return null;
+  }
+
+  static String getSarcasticQuote(double balance, String personalityTone) {
+    if (personalityTone == 'buena_onda') {
+      return '¡Vas súper bien! Sigue así y pronto cumplirás tus metas ✨';
+    } else {
+      if (balance <= 0) {
+        return '0,00 € disponible y cero emoción. Sorpréndeme algún día 💀';
+      } else if (balance < 100) {
+        return 'Tienes saldo para tres cafés y una lágrima. Ajusta ese cinturón 💀';
+      } else {
+        return 'Aún queda saldo, pero no te me vengas arriba en Zara 💀';
+      }
+    }
+  }
+}
