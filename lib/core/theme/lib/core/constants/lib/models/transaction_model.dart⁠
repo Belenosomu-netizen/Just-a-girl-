@@ -1,0 +1,19 @@
+enum TransactionType { expense, income, saving }
+
+class TransactionModel {
+  final String id;
+  final double amount;
+  final TransactionType type;
+  final String categoryId;
+  final String title;
+  final DateTime date;
+
+  TransactionModel({
+    required this.id,
+    required this.amount,
+    required this.type,
+    required this.categoryId,
+    required this.title,
+    required this.date,
+  });
+}
