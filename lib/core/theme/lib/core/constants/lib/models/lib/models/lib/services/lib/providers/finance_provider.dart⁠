@@ -1,0 +1,46 @@
+import 'package:flutter/material.dart';
+import '../models/transaction_model.dart';
+import '../models/saving_goal_model.dart';
+
+class FinanceProvider extends ChangeNotifier {
+  final List<TransactionModel> _transactions = [];
+  final List<SavingGoalModel> _savingGoals = [
+    SavingGoalModel(
+      id: '1',
+      title: 'Escapada a Lisboa',
+      targetAmount: 1000.0,
+      currentAmount: 940.0,
+      emoji: '✈️',
+    ),
+    SavingGoalModel(
+      id: '2',
+      title: 'Fondo de Emergencia',
+      targetAmount: 3000.0,
+      currentAmount: 1200.0,
+      emoji: '🛡️',
+    ),
+  ];
+
+  String _userName = 'Belén';
+  String _personalityTone = 'sin_filtro';
+  int _streakDays = 1;
+
+  List<TransactionModel> get transactions => List.unmodifiable(_transactions);
+  List<SavingGoalModel> get savingGoals => List.unmodifiable(_savingGoals);
+  String get userName => _userName;
+  String get personalityTone => _personalityTone;
+  int get streakDays => _streakDays;
+
+  double get availableBalance => 1500.0 - _transactions.fold(0.0, (sum, item) => sum + item.amount);
+
+  void addTransaction(TransactionModel transaction) {
+    _transactions.insert(0, transaction);
+    _streakDays++;
+    notifyListeners();
+  }
+
+  void setPersonalityTone(String tone) {
+    _personalityTone = tone;
+    notifyListeners();
+  }
+}
