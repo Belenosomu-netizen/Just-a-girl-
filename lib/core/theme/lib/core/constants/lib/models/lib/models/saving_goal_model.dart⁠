@@ -1,0 +1,17 @@
+class SavingGoalModel {
+  final String id;
+  final String title;
+  final double targetAmount;
+  final double currentAmount;
+  final String emoji;
+
+  SavingGoalModel({
+    required this.id,
+    required this.title,
+    required this.targetAmount,
+    required this.currentAmount,
+    required this.emoji,
+  });
+
+  double get progressPercentage => (currentAmount / targetAmount).clamp(0.0, 1.0);
+}
